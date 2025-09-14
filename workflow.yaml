@@ -1,0 +1,75 @@
+id: template_chat_flow
+name: Template Chat Flow
+inputs:
+  chat_history:
+    type: list
+    is_chat_input: false
+    is_chat_history: true
+  question:
+    type: string
+    is_chat_input: true
+outputs:
+  answer:
+    type: string
+    reference: ${pre_chat_llm.output}
+    is_chat_output: true
+nodes:
+- name: pre_chat_llm
+  type: llm
+  source:
+    type: code
+    path: chat.jinja2
+  inputs:
+    deployment_name: gpt-5-mini
+    top_p: 1
+    response_format:
+      type: text
+    chat_history: ${inputs.chat_history}
+    knowledge_base: ${knowledge_base.output}
+    question: ${inputs.question}
+  provider: AzureOpenAI
+  connection: reserch-agent-resource_aoai
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+- name: knowledge_base
+  type: python
+  source:
+    type: package
+    tool: promptflow_vectordb.tool.common_index_lookup.search
+  inputs:
+    mlindex_content: >
+      embeddings:
+        api_base: https://reserch-agent-resource.openai.azure.com/
+        api_type: azure
+        api_version: 2023-07-01-preview
+        batch_size: '1'
+        connection:
+          id: /subscriptions/0d046bc4-0c5d-4d3a-9e11-9c7f4b0954e1/resourceGroups/rg-foundry/providers/Microsoft.MachineLearningServices/workspaces/aihubproject/connections/reserch-agent-resource_aoai
+        connection_type: workspace_connection
+        deployment: text-embedding-ada-002
+        dimension: 1536
+        kind: open_ai
+        model: text-embedding-ada-002
+        schema_version: '2'
+      index:
+        api_version: 2024-05-01-preview
+        connection:
+          id: /subscriptions/0d046bc4-0c5d-4d3a-9e11-9c7f4b0954e1/resourceGroups/rg-foundry/providers/Microsoft.MachineLearningServices/workspaces/aihubproject/connections/aihubsearchindex
+        connection_type: workspace_connection
+        endpoint: https://aihubsearchindex.search.windows.net/
+        engine: azure-sdk
+        field_mapping:
+          content: content
+          embedding: null
+          metadata: meta_json_string
+        index: witty-arm-b6s85gxpks
+        kind: acs
+        semantic_configuration_name: azureml-default
+    queries: ${inputs.question}
+    query_type: Keyword
+    top_k: 3
+  use_variants: false
+node_variants: {}
+environment:
+  python_requirements_txt: requirements.txt
