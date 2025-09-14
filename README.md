@@ -3,6 +3,7 @@
 This repository contains a **chat-based AI workflow** built using **Azure AI Foundry** with support for **Retrieval-Augmented Generation (RAG)**.  
 The flow enables conversational Q&A with a knowledge base, while maintaining chat history for context.
 
+##### Author : SAIDA.D
 ---
 
 ## Overview
@@ -19,7 +20,7 @@ The flow enables conversational Q&A with a knowledge base, while maintaining cha
 
 ## Workflow Design
 
-![Azure AI Foundry](assets/input_output.png)
+![Azure AI Foundry](assets/input-output.png)
 
 ### **Inputs**
 - `chat_history` → Stores conversation context across turns.  
