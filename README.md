@@ -22,6 +22,8 @@ The flow enables conversational Q&A with a knowledge base, while maintaining cha
 
 ![Azure AI Foundry](assets/input-output.png)
 
+![Azure AI Foundry](assets/graph.png)
+
 ### **Inputs**
 - `chat_history` → Stores conversation context across turns.  
 - `question` → User input query.  
