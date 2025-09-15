@@ -24,6 +24,7 @@ The flow enables conversational Q&A with a knowledge base, while maintaining cha
 
 ![Azure AI Foundry](assets/graph.png)
 
+
 ### **Inputs**
 - `chat_history` → Stores conversation context across turns.  
 - `question` → User input query.  
@@ -31,6 +32,45 @@ The flow enables conversational Q&A with a knowledge base, while maintaining cha
 ### **Outputs**
 - `answer` → Final AI-generated answer (chatbot response).  
 
+
+### Traditional Langchain Chatbot
+```python
+
+   from langchain_openai import ChatOpenAI 
+   from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
+   from langchain.memory import ConversationSummaryMemory,ConversationBufferMemory, FileChatMessageHistory
+   from langchain.chains import LLMChain
+
+   api_key="OPENAI_API_KEY"
+
+   # if use completion based models like gpt-3.5-instruct it will prompt error. 
+   # gpt-3.5-turbo-0125 models designed for chat purpose only
+   llm = ChatOpenAI(model='gpt-3.5-turbo-0125', api_key=api_key, max_completion_tokens=2000)
+
+   chat_history= ConversationBufferMemory(
+      chat_memory=FileChatMessageHistory("chat_msgs.json"),
+      memory_key='chat_msgs', return_messages=True
+   )
+
+   prompt= ChatPromptTemplate(
+      # with previous messages
+      # chat_msgs this variable must be same as Chat memory Key
+      input_variables=['question', 'chat_msgs'],
+      messages=[
+         # with previous messages
+         # chat_msgs this variable must be same as Chat memory Key
+         MessagesPlaceholder(variable_name='chat_msgs'),
+         
+         HumanMessagePromptTemplate.from_template("{question}")
+      ]
+   )
+
+   chat_chain= LLMChain(prompt=prompt, llm=llm , memory=chat_history)
+   while True:
+      question=input("You:")
+      bot=chat_chain.invoke(input={'question':question})
+      print('Bot:',bot['text'])
+```
 ### **Nodes**
 1. **knowledge_base (Python tool)**  
    - Performs a vector search over indexed documents.  
